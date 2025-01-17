@@ -5,12 +5,7 @@
     bottom: 0;
     width: 100%;
     background-color: hsla(0, 0%, 19%, 0.883);
-    text-align: center;
-    height: 13vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+}
 
 ul {
     list-style: none;

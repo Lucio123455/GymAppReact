@@ -1,0 +1,27 @@
+h2 {
+    color: #fff;
+}
+
+h3 {
+    color: #fff;
+}
+
+.rutinas {
+    display: flex;
+}
+
+button {
+    background-color: transparent;
+    border: none;
+}
+
+.dias {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 50px;
+}
+
+.contenedorRutinas {
+    flex-grow: 1; 
+    overflow-y: auto;
+}

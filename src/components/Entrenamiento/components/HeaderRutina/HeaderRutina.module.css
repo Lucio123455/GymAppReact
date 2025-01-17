@@ -1,0 +1,54 @@
+.headerRutina{
+    margin-left: 40px;
+    margin-right: 40px;
+}
+
+.botones {
+    margin-right: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.boton {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #999999; /* Azul atractivo */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease; /* Transiciones suaves */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.boton:hover {
+    background-color: #0056b3; /* Azul más oscuro */
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2); /* Más énfasis */
+    transform: translateY(-2px); /* Levanta el botón */
+}
+
+.boton:active {
+    background-color: #004494; /* Azul aún más oscuro */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Botón presionado */
+    transform: translateY(2px); /* Simula presión */
+}
+
+.boton:disabled {
+    background-color: #d6d6d6; /* Gris desactivado */
+    color: #999999;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+img {
+    width: 20px;
+    height: auto;
+    margin-right: 8px;
+}
+
+h2 {
+    color: #ffffff;
+}
