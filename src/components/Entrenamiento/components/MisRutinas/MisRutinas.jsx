@@ -19,7 +19,7 @@ export function MisRutinas() {
     ];
 
     return (
-        <div className="">
+        <div className={styles.contenedorPrincipal}>
             <h2>Mis Rutinas</h2>
             {mostrarRutinas(rutinas)}
         </div>
@@ -50,8 +50,9 @@ function Rutina({ rutina }) {
             {mostrarDias && (
                 <ul className={styles.dias}>
                     {rutina.dias.map((dia, index) => (
-                        <li key={index}>
-                            <h3>{dia}</h3>
+                        <li className={styles.dia} key={index}>
+                            <h3 className={styles.diaTitle}>{dia}</h3>
+                            <button className={styles.boton}>Comenzar</button>
                         </li>
                     ))}
                 </ul>

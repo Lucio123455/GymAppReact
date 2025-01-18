@@ -18,10 +18,63 @@ button {
 .dias {
     display: flex;
     flex-direction: column;
-    margin-bottom: 50px;
 }
 
 .contenedorRutinas {
     flex-grow: 1; 
-    overflow-y: auto;
+}
+
+.contenedorPrincipal {
+    padding-bottom: 60px;
+    margin-left: 40px;
+    margin-top: 25px;
+}
+
+.dia {
+    background-color: rgb(50, 51, 51);
+    margin: 7px;
+    width: 120px;
+    border-radius: 4px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    padding: 6px;
+}
+
+.diaTitle {
+    margin: 3px;
+}
+
+.boton {
+    display: inline-block;
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #0056b3; /* Azul atractivo */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease; /* Transiciones suaves */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.boton:hover {
+    background-color: #0056b3; /* Azul más oscuro */
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2); /* Más énfasis */
+    transform: translateY(-2px); /* Levanta el botón */
+}
+
+.boton:active {
+    background-color: #004494; /* Azul aún más oscuro */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Botón presionado */
+    transform: translateY(2px); /* Simula presión */
+}
+
+.boton:disabled {
+    background-color: #d6d6d6; /* Gris desactivado */
+    color: #999999;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
 }
