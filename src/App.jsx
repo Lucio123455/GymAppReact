@@ -9,7 +9,6 @@ import CrearRutina from "./components/Entrenamiento/components/CrearRutina/Crear
 
 function AppContent() {
   const location = useLocation();
-  console.log(location)
   // Determinar el título en función de la ruta actual
   const getTitle = () => {
     const path = location.pathname;
