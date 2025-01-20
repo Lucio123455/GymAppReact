@@ -1,0 +1,73 @@
+.diasSemanales {
+    display: flex;
+    flex-direction: column;
+    color: aliceblue;
+}
+
+.dia {
+    margin: 15px;
+}
+
+.contenedorFormulario {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.boton {
+    background-color: aqua;
+}
+
+.listaDias {
+    display: flex;
+    flex-direction: column;
+}
+
+.diaEnLista {
+    
+    background-color: aqua;
+    margin: 5px;
+}
+
+.botonDia {
+    display: block; /* Asegura que el botón se comporte como un bloque */
+    width: 90%; /* Ocupa casi todo el ancho */
+    margin: 10px auto; /* Espaciado vertical y centrado horizontal */
+    padding: 10px 20px; /* Espaciado interno */
+    background-color: #007BFF; /* Azul brillante */
+    color: white; /* Texto blanco */
+    border: none; /* Sin borde */
+    border-radius: 5px; /* Bordes redondeados */
+    font-size: 16px; /* Tamaño de fuente */
+    font-weight: bold; /* Texto en negrita */
+    text-align: center; /* Centra el texto */
+    cursor: pointer; /* Cambia el cursor a mano */
+    transition: background-color 0.3s ease; /* Efecto suave al pasar el mouse */
+}
+
+.botonDia:hover {
+    background-color: #0056b3; /* Azul más oscuro al pasar el mouse */
+}
+
+.botonDia:active {
+    background-color: #003d80; /* Azul aún más oscuro al hacer clic */
+}
+
+.botonDiaConfirmado {
+    display: block; /* Asegura que el botón se comporte como un bloque */
+    width: 90%; /* Ocupa casi todo el ancho */
+    margin: 10px auto; /* Espaciado vertical y centrado horizontal */
+    padding: 10px 20px; /* Espaciado interno */
+    background-color: #03d843; /* Azul brillante */
+    color: white; /* Texto blanco */
+    border: none; /* Sin borde */
+    border-radius: 5px; /* Bordes redondeados */
+    font-size: 16px; /* Tamaño de fuente */
+    font-weight: bold; /* Texto en negrita */
+    text-align: center; /* Centra el texto */
+    cursor: pointer; /* Cambia el cursor a mano */
+    transition: background-color 0.3s ease; /* Efecto suave al pasar el mouse */
+}
+
+

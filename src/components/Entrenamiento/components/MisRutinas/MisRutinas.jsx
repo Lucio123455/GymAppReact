@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import styles from './MisRutinas.module.css';
 import flechitaImg from '../../../../assets/flechita.png';
+import { Link } from 'react-router-dom';
 
 export function MisRutinas() {
     const rutinas = [
@@ -52,7 +53,9 @@ function Rutina({ rutina }) {
                     {rutina.dias.map((dia, index) => (
                         <li className={styles.dia} key={index}>
                             <h3 className={styles.diaTitle}>{dia}</h3>
-                            <button className={styles.boton}>Comenzar</button>
+                            <Link to={`/entrenamiento/${rutina.nombre.toLowerCase()}/${dia.toLowerCase()}`} className={styles.boton}>
+                                Comenzar
+                            </Link>
                         </li>
                     ))}
                 </ul>
@@ -60,5 +63,4 @@ function Rutina({ rutina }) {
         </div>
     );
 }
-
 

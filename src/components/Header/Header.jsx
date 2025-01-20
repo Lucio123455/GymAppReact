@@ -1,10 +1,10 @@
 import styles from './Header.module.css'
 
-export function Header() {
+export function Header({titulo}) {
     return (
       <>
         <div className={styles.header}>
-            <h1 className={styles.title}>Entrenamiento</h1>
+            <h1 className={styles.title}>{titulo}</h1>
         </div>
       </>
     );
