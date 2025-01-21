@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import styles from './CrearRutina.module.css';
 import { Link } from 'react-router-dom';
+import tick from '../../../../assets/marca-de-verificacion.png'
+import cruz from '../../../../assets/cerrar.png'
 
 function CrearRutina() {
     const [pasos, setPasos] = useState(0);
     const [diasSeleccionados, setDiasSeleccionados] = useState([]);
-
+    
     const handleConfirmarRutinaYDias = () => {
 
         const nombreRutina = document.querySelector('#nombre-rutina').value;
@@ -63,8 +65,25 @@ function CargarDias({ dias, handleConfirmarRutina }) {
         setDiaSeleccionado(dia); // Actualiza el día seleccionado
     };
 
+    const handleVolver = () => {
+        setDiaSeleccionado(null);
+    }
+
     const handleConfirmar = (dia, ejercicios) => {
-        setDiasConfirmados((prev) => [...prev, { dia, ejercicios }]);
+        setDiasConfirmados((prev) => {
+            // Verificar si ya existe un día con el mismo nombre
+            const diaExistenteIndex = prev.findIndex(d => d.dia === dia);
+    
+            if (diaExistenteIndex !== -1) {
+                // Si el día ya existe, reemplazar el día con los nuevos ejercicios
+                const nuevosDias = [...prev];
+                nuevosDias[diaExistenteIndex] = { dia, ejercicios };
+                return nuevosDias;
+            } else {
+                // Si el día no existe, agregarlo al final
+                return [...prev, { dia, ejercicios }];
+            }
+        });
         setDiaSeleccionado(null);
     };
 
@@ -86,12 +105,8 @@ function CargarDias({ dias, handleConfirmarRutina }) {
                             <li key={dia}>
                                 <button
                                     className={` ${esDiaConfirmado(dia) ? styles.botonDiaConfirmado : styles.botonDia}`}
-                                    onClick={
-                                        esDiaConfirmado(dia)
-                                            ? undefined
-                                            : () => handleSeleccionarDia(dia)
+                                    onClick={() => handleSeleccionarDia(dia)
                                     }
-                                    disabled={esDiaConfirmado(dia)} // Evita interacción si está confirmado
                                 >
                                     {dia}
                                 </button>
@@ -112,6 +127,7 @@ function CargarDias({ dias, handleConfirmarRutina }) {
                 <CargarEjercicio
                     dia={diaSeleccionado}
                     handleConfirmar={handleConfirmar}
+                    handleVolver={handleVolver}
                 />
             )}
         </>
@@ -119,66 +135,115 @@ function CargarDias({ dias, handleConfirmarRutina }) {
     );
 }
 
-function CargarEjercicio({ dia, handleConfirmar }) {
+function CargarEjercicio({ dia, handleConfirmar, handleVolver }) {
     const [mostrarFormulario, setMostrarFormulario] = useState(false);
     const [ejercicios, setEjercicios] = useState([]);
-    const [nuevoEjercicio, setNuevoEjercicio] = useState('');
+    const [nuevoEjercicio, setNuevoEjercicio] = useState("");
+    const [series, setSeries] = useState(1); // Estado para las series del ejercicio
 
     const agregarEjercicio = () => {
         setMostrarFormulario(true);
     };
 
     const confirmarEjercicio = () => {
-        if (nuevoEjercicio.trim() === '') return;
-        setEjercicios((prevEjercicios) => [...prevEjercicios, nuevoEjercicio]);
-        setNuevoEjercicio('');
+        if (nuevoEjercicio.trim() === "") return;
+        setEjercicios((prevEjercicios) => [
+            ...prevEjercicios,
+            { nombre: nuevoEjercicio, series }, // Guarda nombre y series
+        ]);
+        setNuevoEjercicio("");
+        setSeries(1); // Reinicia las series al valor inicial
         setMostrarFormulario(false);
-        console.log(ejercicios);
     };
+
+    const borrarEjercicio = (ejercicio) => {
+        const nuevosEjercicios = ejercicios.filter(item => item.nombre !== ejercicio.nombre);
+        setEjercicios(nuevosEjercicios);
+    };
+
+    const cerrarFormulario = () => {
+        setMostrarFormulario(false)
+    }
 
 
     return (
         <div className={styles.contenedorFormulario}>
-            <button className={styles.botonDia} onClick={agregarEjercicio}>
+            {ejercicios.length > 0 && (
+                <ul className={styles.listaEjercicios}>
+                    {ejercicios.map((ejercicio, index) => (
+                        <li className={styles.ejercicioLi} key={index}>
+                            <p>{ejercicio.series}</p>
+                            <p>{ejercicio.nombre}</p>
+                            <button onClick={() => borrarEjercicio(ejercicio)}><img src={cruz} alt="" /></button>
+                        </li>
+                    ))}
+                </ul>
+            )}
+
+            <button
+                className={styles.botonAgregarEjercicio}
+                onClick={agregarEjercicio}
+            >
                 Agregar Ejercicio
             </button>
 
-            {mostrarFormulario && (
-                <div>
-                    <label htmlFor="nombre-ejercicio">Nombre del ejercicio</label>
+            {mostrarFormulario ? (
+                <div className={styles.formEjercicio}>
                     <input
                         type="text"
                         id="nombre-ejercicio"
                         placeholder="Nombre del ejercicio"
                         value={nuevoEjercicio}
-                        onChange={(e) => setNuevoEjercicio(e.target.value)} // Controla el input
+                        onChange={(e) => setNuevoEjercicio(e.target.value)}
                         required
+                        className={styles.inputEjercicioNombre}
                     />
-                    
-                    <button className={styles.botonDia} onClick={confirmarEjercicio}>Confirmar</button>
+                    <select
+                        id="series-ejercicio"
+                        value={series}
+                        onChange={(e) => setSeries(Number(e.target.value))}
+                        className={styles.series}
+                    >
+                        {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
+                            <option key={num} value={num}>
+                                {num}
+                            </option>
+                        ))}
+                    </select>
+                    <button
+                        className={styles.confirmarEjercicio}
+                        onClick={confirmarEjercicio}
+                    >
+                        <img src={tick} alt="Confirmar" />
+                    </button>
+                    <button
+                        className={styles.volverDelForm}
+                        onClick={cerrarFormulario}
+                    >
+                        <img src={cruz} alt="Confirmar" />
+                    </button>
                 </div>
+            ) : (
+                <>
+                    <button
+                        className={styles.botonConfirmarDia}
+                        onClick={() => handleConfirmar(dia, ejercicios)}
+                        disabled={ejercicios.length === 0}
+                    >
+                        Confirmar Día
+                    </button>
+                    
+                    <button
+                    className={styles.botonConfirmarDia}
+                    onClick={() => handleVolver()}
+                    >
+                        Volver
+                    </button>
+                </>
             )}
-
-            {ejercicios.length > 0 && (
-                <ul>
-                    {ejercicios.map((ejercicio, index) => (
-                        <li className={styles.botonDia} key={index}>{ejercicio}</li>
-                    ))}
-                </ul>
-            )}
-
-
-            <button
-                className={styles.boton}
-                onClick={() => handleConfirmar(dia, ejercicios)}
-                disabled={ejercicios.length === 0}  // Desactiva el botón si no hay ejercicios
-            >
-                Confirmar
-            </button>
         </div>
     );
 }
-
 
 
 function PasoRutinaYDiasSeleccionados({ handleConfirmarRutinaYDias }) {
