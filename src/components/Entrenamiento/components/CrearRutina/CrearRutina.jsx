@@ -1,6 +1,6 @@
-import React, { useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './CrearRutina.module.css';
-import { Link, Route, Routes, Outlet, useParams, useLocation  } from 'react-router-dom';
+import { Link, Route, Routes, Outlet, useParams, useLocation, useNavigate } from 'react-router-dom';
 import tick from '../../../../assets/marca-de-verificacion.png'
 import cruz from '../../../../assets/cerrar.png'
 
@@ -10,6 +10,22 @@ function CrearRutina() {
         nombre: "",
         dias: []
     });
+
+
+    const navigate = useNavigate();
+
+    const handleBack = () => {
+        // Controla lo que ocurre al "volver atrás"
+        navigate('/crear-rutina');
+    };
+
+    useEffect(() => {
+        window.onpopstate = handleBack;
+
+        return () => {
+            window.onpopstate = null; // Limpia el efecto
+        };
+    }, []);
 
     const siguientePaso = () => setPaso((prev) => prev + 1);
 
@@ -50,9 +66,9 @@ function CrearRutina() {
                     dias={rutina.dias}
                 />
 
-                
-               
-                
+
+
+
             </>
         )
     }
@@ -70,7 +86,7 @@ function SegundoPaso({ nombre, dias }) {
 }
 
 export function DiaConstructor({ dias }) {
-    
+
 }
 
 function MostrarDias({ dias }) {
@@ -81,7 +97,7 @@ function MostrarDias({ dias }) {
                 {dias.length > 0 ? (
                     dias.map((dia, index) => (
                         <li key={index}>
-                            <Link 
+                            <Link
                                 to={`/crear-rutina/${dia.toLowerCase()}`}
                                 state={dia}
                             >
