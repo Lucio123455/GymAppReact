@@ -1,311 +1,172 @@
-import React, { useState } from 'react';
+import React, { useState} from 'react';
 import styles from './CrearRutina.module.css';
-import { Link } from 'react-router-dom';
+import { Link, Route, Routes, Outlet, useParams, useLocation  } from 'react-router-dom';
 import tick from '../../../../assets/marca-de-verificacion.png'
 import cruz from '../../../../assets/cerrar.png'
 
 function CrearRutina() {
-    const [pasos, setPasos] = useState(0);
-    const [diasSeleccionados, setDiasSeleccionados] = useState([]);
-    
-    const handleConfirmarRutinaYDias = () => {
+    const [paso, setPaso] = useState(0);
+    const [rutina, setRutina] = useState({
+        nombre: "",
+        dias: []
+    });
 
-        const nombreRutina = document.querySelector('#nombre-rutina').value;
+    const siguientePaso = () => setPaso((prev) => prev + 1);
 
-
-        const rutina = {
-            nombre: nombreRutina
-        }
-
-        localStorage.setItem('rutina', JSON.stringify(rutina));
-        const checkboxes = document.querySelectorAll('input[name="dias"]:checked');
-        const dias = Array.from(checkboxes).map((checkbox) => checkbox.value);
-
-        setDiasSeleccionados(dias);
-        if (nombreRutina != '' && dias.length > 0) {
-            setPasos(1)
-        } else {
-            alert("asd")
-        }
-
+    const cambiarNombreRutina = (nuevoNombre) => {
+        setRutina((prevRutina) => ({
+            ...prevRutina,
+            nombre: nuevoNombre
+        }));
     };
 
-    const handleConfirmarRutina = (diasConfirmados) => {
-        const rutinaGuardada = JSON.parse(localStorage.getItem('rutina')) || {};
-
-
-        const rutina = {
-            ...rutinaGuardada,
-            dias: diasConfirmados,
-            fechaCreacion: new Date().toISOString() // Ejemplo de fecha de creación
-        };
-
-        // Guardar el objeto rutina en localStorage
-        localStorage.setItem('rutina', JSON.stringify(rutina));
-
-        console.log('Rutina guardada:', rutina);
-    };
-
-
-    return (
-        <>
-            {pasos === 0 && (
-                <PasoRutinaYDiasSeleccionados handleConfirmarRutinaYDias={handleConfirmarRutinaYDias} />
-            )}
-            {pasos === 1 && <CargarDias dias={diasSeleccionados} handleConfirmarRutina={handleConfirmarRutina} />}
-        </>
-    );
-}
-
-function CargarDias({ dias, handleConfirmarRutina }) {
-    const [diaSeleccionado, setDiaSeleccionado] = useState(null); // Estado para el día seleccionado
-    const [diasConfirmados, setDiasConfirmados] = useState([]); // Días confirmados
-
-    const handleSeleccionarDia = (dia) => {
-        setDiaSeleccionado(dia); // Actualiza el día seleccionado
-    };
-
-    const handleVolver = () => {
-        setDiaSeleccionado(null);
+    const diasDeLaRutina = (diasElegidos) => {
+        setRutina((prevRutina) => ({
+            ...prevRutina,
+            dias: diasElegidos
+        }))
     }
 
-    const handleConfirmar = (dia, ejercicios) => {
-        setDiasConfirmados((prev) => {
-            // Verificar si ya existe un día con el mismo nombre
-            const diaExistenteIndex = prev.findIndex(d => d.dia === dia);
-    
-            if (diaExistenteIndex !== -1) {
-                // Si el día ya existe, reemplazar el día con los nuevos ejercicios
-                const nuevosDias = [...prev];
-                nuevosDias[diaExistenteIndex] = { dia, ejercicios };
-                return nuevosDias;
-            } else {
-                // Si el día no existe, agregarlo al final
-                return [...prev, { dia, ejercicios }];
-            }
-        });
-        setDiaSeleccionado(null);
+    const handleClickTerminarPrimerPaso = () => {
+        siguientePaso();
+        console.log("Nombre de la rutina:", rutina.nombre);
     };
 
-    const esDiaConfirmado = (dia) => {
-        return diasConfirmados.some((d) => d.dia === dia); // Comprueba si el día está confirmado
-    };
-
-    const rutina = JSON.parse(localStorage.getItem('rutina')); // Parsear el objeto
-    const nombreRutina = rutina ? rutina.nombre : null; // Obtener el nombre si existe, de lo contrario, null
-    console.log(diasConfirmados)
-
-    return (
-        <>
-            {!diaSeleccionado ? (
-                <div className={styles.contenedorFormulario}>
-                    <h2 className={styles.tituloDias}>{nombreRutina}</h2>
-                    <ul className={styles.listaDias}>
-                        {dias.map((dia) => (
-                            <li key={dia}>
-                                <button
-                                    className={` ${esDiaConfirmado(dia) ? styles.botonDiaConfirmado : styles.botonDia}`}
-                                    onClick={() => handleSeleccionarDia(dia)
-                                    }
-                                >
-                                    {dia}
-                                </button>
-                            </li>
-                        ))}
-
-                        {/* Verifica si todos los días están confirmados */}
-                        {diasConfirmados.length === dias.length && (
-                            <Link to="/entrenamiento">
-                                <button className={styles.botonConfirmarDias} onClick={() => handleConfirmarRutina(diasConfirmados)}>
-                                    Finalizar Rutina
-                                </button>
-                            </Link>
-                        )}
-                    </ul>
-                </div>
-            ) : (
-                <CargarEjercicio
-                    dia={diaSeleccionado}
-                    handleConfirmar={handleConfirmar}
-                    handleVolver={handleVolver}
+    if (paso === 0) {
+        return (
+            <PrimerPaso
+                nombre={rutina.nombre}
+                onNombreChange={cambiarNombreRutina}
+                onNext={handleClickTerminarPrimerPaso}
+                dias={rutina.dias}
+                onDiasElegidos={diasDeLaRutina}
+            />
+        );
+    } else {
+        return (
+            <>
+                <SegundoPaso
+                    nombre={rutina.nombre}
+                    dias={rutina.dias}
                 />
-            )}
-        </>
 
-    );
-}
-
-function CargarEjercicio({ dia, handleConfirmar, handleVolver }) {
-    const [mostrarFormulario, setMostrarFormulario] = useState(false);
-    const [ejercicios, setEjercicios] = useState([]);
-    const [nuevoEjercicio, setNuevoEjercicio] = useState("");
-    const [series, setSeries] = useState(1); // Estado para las series del ejercicio
-
-    const agregarEjercicio = () => {
-        setMostrarFormulario(true);
-    };
-
-    const confirmarEjercicio = () => {
-        if (nuevoEjercicio.trim() === "") return;
-        setEjercicios((prevEjercicios) => [
-            ...prevEjercicios,
-            { nombre: nuevoEjercicio, series }, // Guarda nombre y series
-        ]);
-        setNuevoEjercicio("");
-        setSeries(1); // Reinicia las series al valor inicial
-        setMostrarFormulario(false);
-    };
-
-    const borrarEjercicio = (ejercicio) => {
-        const nuevosEjercicios = ejercicios.filter(item => item.nombre !== ejercicio.nombre);
-        setEjercicios(nuevosEjercicios);
-    };
-
-    const cerrarFormulario = () => {
-        setMostrarFormulario(false)
+                
+               
+                
+            </>
+        )
     }
-
-
-    return (
-        <div className={styles.contenedorFormulario}>
-            {ejercicios.length > 0 && (
-                <ul className={styles.listaEjercicios}>
-                    {ejercicios.map((ejercicio, index) => (
-                        <li className={styles.ejercicioLi} key={index}>
-                            <p>{ejercicio.series}</p>
-                            <p>{ejercicio.nombre}</p>
-                            <button onClick={() => borrarEjercicio(ejercicio)}><img src={cruz} alt="" /></button>
-                        </li>
-                    ))}
-                </ul>
-            )}
-
-            <button
-                className={styles.botonAgregarEjercicio}
-                onClick={agregarEjercicio}
-            >
-                Agregar Ejercicio
-            </button>
-
-            {mostrarFormulario ? (
-                <div className={styles.formEjercicio}>
-                    <input
-                        type="text"
-                        id="nombre-ejercicio"
-                        placeholder="Nombre del ejercicio"
-                        value={nuevoEjercicio}
-                        onChange={(e) => setNuevoEjercicio(e.target.value)}
-                        required
-                        className={styles.inputEjercicioNombre}
-                    />
-                    <select
-                        id="series-ejercicio"
-                        value={series}
-                        onChange={(e) => setSeries(Number(e.target.value))}
-                        className={styles.series}
-                    >
-                        {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
-                            <option key={num} value={num}>
-                                {num}
-                            </option>
-                        ))}
-                    </select>
-                    <button
-                        className={styles.confirmarEjercicio}
-                        onClick={confirmarEjercicio}
-                    >
-                        <img src={tick} alt="Confirmar" />
-                    </button>
-                    <button
-                        className={styles.volverDelForm}
-                        onClick={cerrarFormulario}
-                    >
-                        <img src={cruz} alt="Confirmar" />
-                    </button>
-                </div>
-            ) : (
-                <>
-                    <button
-                        className={styles.botonConfirmarDia}
-                        onClick={() => handleConfirmar(dia, ejercicios)}
-                        disabled={ejercicios.length === 0}
-                    >
-                        Confirmar Día
-                    </button>
-                    
-                    <button
-                    className={styles.botonConfirmarDia}
-                    onClick={() => handleVolver()}
-                    >
-                        Volver
-                    </button>
-                </>
-            )}
-        </div>
-    );
 }
 
-
-function PasoRutinaYDiasSeleccionados({ handleConfirmarRutinaYDias }) {
+function SegundoPaso({ nombre, dias }) {
     return (
         <>
-            <div className={styles.contenedorFormulario}>
-                <NombreRutina />
-                <DiasRutina />
-                <ConfirmarDiasRutina handleConfirmarRutinaYDias={handleConfirmarRutinaYDias} />
-            </div>
+            <h1 className={styles.tituloDias}>{nombre}</h1>
+            <MostrarDias
+                dias={dias}
+            />
         </>
     );
 }
 
-function NombreRutina() {
+export function DiaConstructor({ dias }) {
+    
+}
+
+function MostrarDias({ dias }) {
+    return (
+        <>
+            <h2>Días seleccionados:</h2>
+            <ul className={styles.listaDias}>
+                {dias.length > 0 ? (
+                    dias.map((dia, index) => (
+                        <li key={index}>
+                            <Link 
+                                to={`/crear-rutina/${dia.toLowerCase()}`}
+                                state={dia}
+                            >
+                                {dia}
+                            </Link>
+                        </li>
+                    ))
+                ) : (
+                    <p>No se han seleccionado días.</p>
+                )}
+            </ul>
+        </>
+    );
+}
+
+
+function PrimerPaso({ nombre, onNombreChange, onNext, dias, onDiasElegidos }) {
+    return (
+        <>
+            <NombreRutina
+                nombre={nombre}
+                onNombreChange={onNombreChange}
+            />
+            <DiasPosibles
+                dias={dias}
+                onDiasElegidos={onDiasElegidos}
+            />
+            <BotonTerminarPrimerPaso
+                onNext={onNext}
+            />
+        </>
+    );
+}
+
+function NombreRutina({ nombre, onNombreChange }) {
     return (
         <>
             <label htmlFor="nombre-rutina" className={styles.nombreRutina}>Nombre de la rutina</label>
-            <input type="text" id="nombre-rutina" className={styles.inputNombreRutina} placeholder="Nombre de la rutina" required />
+            <input
+                type="text" id="nombre-rutina"
+                className={styles.inputNombreRutina}
+                placeholder="Nombre de la rutina"
+                required
+                value={nombre}
+                onChange={(e) => onNombreChange(e.target.value)}
+            />
         </>
     );
 }
 
-function DiasRutina() {
+function DiasPosibles({ dias, onDiasElegidos }) {
+    const todosLosDias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+    const handleCheckboxChange = (dia, isChecked) => {
+        const nuevosDias = isChecked
+            ? [...dias, dia]
+            : dias.filter((d) => d !== dia);
+
+        onDiasElegidos(nuevosDias);
+    };
+
     return (
         <>
             <label htmlFor="dias-semanales">Días semanales</label>
             <div id="dias-semanales" className={styles.diasSemanales}>
-                <label className={styles.dia}>
-                    <input type="checkbox" name="dias" value="Lunes" /> Lunes
-                </label>
-                <label className={styles.dia}>
-                    <input type="checkbox" name="dias" value="Martes" /> Martes
-                </label>
-                <label className={styles.dia}>
-                    <input type="checkbox" name="dias" value="Miércoles" /> Miércoles
-                </label>
-                <label className={styles.dia}>
-                    <input type="checkbox" name="dias" value="Jueves" /> Jueves
-                </label>
-                <label className={styles.dia}>
-                    <input type="checkbox" name="dias" value="Viernes" /> Viernes
-                </label>
-                <label className={styles.dia}>
-                    <input type="checkbox" name="dias" value="Sábado" /> Sábado
-                </label>
-                <label className={styles.dia}>
-                    <input type="checkbox" name="dias" value="Domingo" /> Domingo
-                </label>
+                {todosLosDias.map((dia) => (
+                    <label key={dia} className={styles.dia}>
+                        <input
+                            type="checkbox"
+                            name="dias"
+                            value={dia}
+                            checked={dias.includes(dia)} // Verificar si el día está seleccionado
+                            onChange={(e) => handleCheckboxChange(dia, e.target.checked)}
+                        />
+                        {dia}
+                    </label>
+                ))}
             </div>
         </>
     );
 }
 
-function ConfirmarDiasRutina({ handleConfirmarRutinaYDias }) {
-    return (
-        <>
-            <button className={styles.botonConfirmar} onClick={handleConfirmarRutinaYDias}>
-                Confirmar
-            </button>
-        </>
-    );
+
+function BotonTerminarPrimerPaso({ onNext }) {
+    return <button className={styles.botonConfirmar} onClick={onNext}>Confirmar</button>
 }
 
-export default CrearRutina;
+export default CrearRutina
