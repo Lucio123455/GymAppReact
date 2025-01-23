@@ -41,8 +41,18 @@ function CrearRutina() {
         });
         console.log(dias);
     };
-    
-    
+
+    useEffect(() => {
+        console.log('Updated rutina:', rutina);
+    }, [rutina]);
+
+    const handleConfirmarRutina = () => {
+        setRutina((prevRutina) => ({
+            ...prevRutina,
+            dias: dias
+        }));
+        alert("rutina creada con exito");
+    }
 
     const handleClickTerminarPrimerPaso = () => {
         siguientePaso();
@@ -63,32 +73,20 @@ function CrearRutina() {
         return (
             <>
                 <SegundoPaso
-                    nombre={rutina.nombre}
                     dias={dias}
                     agregarEjercicioADias={agregarEjercicioADias}
+                    handleConfirmarRutina={handleConfirmarRutina}
                 />
             </>
         )
     }
 }
 
-function SegundoPaso({ nombre, dias, agregarEjercicioADias }) {
-    return (
-        <>
-            <h1 className={styles.tituloDias}>{nombre}</h1>
-            <MostrarDias
-                dias={dias}
-                agregarEjercicioADias={agregarEjercicioADias}
-            />
-        </>
-    );
-}
-
-function MostrarDias({ dias , agregarEjercicioADias}) {
+function SegundoPaso({ dias, agregarEjercicioADias, handleConfirmarRutina }) {
     const navigate = useNavigate();
 
     const handleBack = () => {
-        setMostrarDiaSeleccionado(null)
+        setDiaSeleccionado(null)
         navigate('/entrenamiento/crear-rutina');
     };
 
@@ -100,56 +98,161 @@ function MostrarDias({ dias , agregarEjercicioADias}) {
         };
     }, []);
 
-    const [diaSeleccionado, setMostrarDiaSeleccionado] = useState(null)
+    const [diaSeleccionado, setDiaSeleccionado] = useState(null)
 
     const handleMostrarDia = (dia) => {
-        setMostrarDiaSeleccionado(dia)
+        setDiaSeleccionado(dia)
     }
 
+    const [diasConfirmados, setDiasConfirmados] = useState([]);
+
+    const sacarDeDiasConfirmados = (dia) => {
+        if (diasConfirmados.includes(dia)) {
+            setDiasConfirmados(diasConfirmados.filter(d => d !== dia));
+        }
+    };
+
+    const handleConfirmarDia = (dia) => {
+        if (!diasConfirmados.includes(dia)) {
+            setDiasConfirmados([...diasConfirmados, dia]);
+        }
+        setDiaSeleccionado(null)
+    }
 
     return (
         <>
             {/* Si mostrarDia tiene un valor, muestra el <h1> con el día */}
-            {diaSeleccionado &&
+            {diaSeleccionado ? (
                 <>
                     <CargarEjercicios
                         dia={diaSeleccionado}
                         dias={dias}
                         agregarEjercicioADias={agregarEjercicioADias}
+                        handleConfirmarDia={handleConfirmarDia}
+                        sacarDeDiasConfirmados={sacarDeDiasConfirmados}
                     />
                 </>
-            }
-
-            {/* Si no hay día seleccionado, muestra la lista */}
-            {!diaSeleccionado && (
+            ) : (
                 <>
-                    <h2>Días seleccionados:</h2>
-                    <ul className={styles.listaDias}>
-                        {dias.length > 0 ? (
-                            dias.map((dia, index) => (
-                                <li key={index}>
-                                    <button
-                                        onClick={() => handleMostrarDia(dia.nombre)}
-                                        className={styles.botonDia}
-                                    >
-                                        {dia.nombre}
-                                    </button>
-                                </li>
-                            ))
-                        ) : (
-                            <p>No se han seleccionado días.</p>
-                        )}
-                    </ul>
+                    <ListaDias
+                        dias={dias}
+                        handleMostrarDia={handleMostrarDia}
+                        diasConfirmados={diasConfirmados} />
+                    {diasConfirmados.length === dias.length && (
+                        <BotonConfirmarRutina handleConfirmarRutina={handleConfirmarRutina} />
+                    )}
                 </>
             )}
         </>
     );
 }
 
-function BotonCargarEjercicios({ agregarEjercicio }) {
+function BotonConfirmarRutina({ handleConfirmarRutina }) {
+    return (
+        <>
+            <Link to={"/entrenamiento"}>
+                <button
+                    className={styles.botonDia}
+                    onClick={() => handleConfirmarRutina()}
+                >
+                    Confirmar Rutina
+                </button>
+
+            </Link>
+        </>
+    );
+}
+
+function ListaDias({ dias, handleMostrarDia, diasConfirmados }) {
+    const esDiaConfirmado = (dia, diasConfirmados) => {
+        return diasConfirmados.includes(dia);
+    };
+
+    return (
+        <>
+            <h2>Días seleccionados:</h2>
+            <ul className={styles.listaDias}>
+                {dias.length > 0 ? (
+                    dias.map((dia, index) => (
+                        <Dia
+                            key={`${dia.nombre}-${index}`}
+                            dia={dia}
+                            index={index}
+                            handleMostrarDia={handleMostrarDia}
+                            esDiaConfirmado={esDiaConfirmado(dia.nombre, diasConfirmados)}
+                        />
+                    ))
+                ) : (
+                    <p>No se han seleccionado días.</p>
+                )}
+            </ul>
+        </>
+    );
+}
+
+function Dia({ dia, index, handleMostrarDia, esDiaConfirmado }) {
+    return (
+        <li key={`${dia.nombre}-${index}`}>
+            <button
+                onClick={() => handleMostrarDia(dia.nombre)}
+                className={styles.botonDia}
+                style={{ backgroundColor: esDiaConfirmado ? 'green' : 'blue' }}
+            >
+                {dia.nombre}
+            </button>
+        </li>
+    );
+}
+
+
+// Componente principal para cargar ejercicios
+function CargarEjercicios({ dia, dias, agregarEjercicioADias, handleConfirmarDia, sacarDeDiasConfirmados }) {
+    const [mostrarForm, setMostrarForm] = useState(false); // Estado para mostrar el formulario
+
+    const agregarEjercicio = () => {
+        setMostrarForm(true);
+        sacarDeDiasConfirmados(dia)
+    };
+
+    const confirmarEjercicio = () => {
+        setMostrarForm(false)
+    }
+
+    return (
+        <>
+            <h1>{dia}</h1>
+
+            <ListaDeEjercicios diaSeleccionado={dia} dias={dias} />
+            {/* Si mostrarForm es true, mostramos el formulario, de lo contrario mostramos el botón */}
+            {mostrarForm ? (
+                <FormCargarEjercicios finalizarEjercicio={confirmarEjercicio} dia={dia} agregarEjercicioADias={agregarEjercicioADias} /> // Mostrar formulario
+            ) : (
+                <>
+                    <BotonAgregarEjercicios agregarEjercicio={agregarEjercicio} /> // Mostrar botón
+                    <BotonConfirmarDia handleConfirmarDia={handleConfirmarDia} dia={dia} />
+                </>
+            )}
+        </>
+    );
+}
+
+function BotonConfirmarDia({ handleConfirmarDia, dia }) {
+    return (
+        <>
+            <button
+                className={styles.botonDia}
+                onClick={() => handleConfirmarDia(dia)}
+            >
+                Confirmar Dia
+            </button>
+        </>
+    );
+}
+
+function BotonAgregarEjercicios({ agregarEjercicio, }) {
     return (
         <button className={styles.botonDia} onClick={agregarEjercicio}>
-            Cargar Ejercicio
+            Agregar Ejercicio
         </button>
     );
 }
@@ -186,31 +289,26 @@ function FormCargarEjercicios({ finalizarEjercicio, dia, agregarEjercicioADias }
     );
 }
 
-// Componente principal para cargar ejercicios
-function CargarEjercicios({ dia, dias ,agregarEjercicioADias }) {
-    const [mostrarForm, setMostrarForm] = useState(false); // Estado para mostrar el formulario
+function ListaDeEjercicios({ dias, diaSeleccionado }) {
+    const diaEncontrado = dias.find((dia) => dia.nombre === diaSeleccionado);
 
-    const agregarEjercicio = () => {
-        setMostrarForm(true);
-    };
-
-    const confirmarEjercicio = () => {
-        setMostrarForm(false)
-        
-    }
-    
-    
     return (
-        <>  
-            <h1>{dia}</h1>
-            {/* Si mostrarForm es true, mostramos el formulario, de lo contrario mostramos el botón */}
-            {mostrarForm ? (
-                <FormCargarEjercicios finalizarEjercicio={confirmarEjercicio} dia={dia} agregarEjercicioADias={agregarEjercicioADias} /> // Mostrar formulario
+        <>
+            {diaEncontrado && Array.isArray(diaEncontrado.ejercicios) ? (
+                <ul className={styles.listaDias}>
+                    {diaEncontrado.ejercicios.map((ejercicio, index) => (
+                        <Ejercicio ejercicio={ejercicio} index={index} />
+                    ))}
+                </ul>
             ) : (
-                <BotonCargarEjercicios agregarEjercicio={agregarEjercicio} /> // Mostrar botón
+                <p>Aun no has cargado ejercicios en: {diaSeleccionado}, carga el primero dando click en agregar ejercicio</p>
             )}
         </>
     );
+}
+
+function Ejercicio({ ejercicio, index }) {
+    return <li key={`${ejercicio}-${index}`} className={styles.botonDia}>{ejercicio}</li>
 }
 
 
@@ -252,15 +350,21 @@ function DiasPosibles({ dias, onDiasElegidos }) {
     const todosLosDias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
     const handleCheckboxChange = (dia, isChecked) => {
-        // Si se selecciona el día, agregamos el objeto al array, de lo contrario lo eliminamos
-        const nuevosDias = isChecked
-            ? [...dias, { nombre: dia, activo: true }] // Agregar el día como objeto con 'activo'
-            : dias.filter((d) => d.nombre !== dia); // Eliminar el día si se deselecciona
+        let nuevosDias;
+    
+        if (isChecked) {
+            nuevosDias = [...dias, { nombre: dia, activo: true }];
+        } else {
+            nuevosDias = dias.filter((d) => d.nombre !== dia);
+        }
+    
+        nuevosDias.sort((a, b) => {
+            return todosLosDias.indexOf(a.nombre) - todosLosDias.indexOf(b.nombre);
+        });
 
-        // Llamar a onDiasElegidos para pasar el array actualizado
-        onDiasElegidos(nuevosDias)
+        onDiasElegidos(nuevosDias);
     };
-
+    
     return (
         <>
             <label htmlFor="dias-semanales">Días semanales</label>
@@ -281,10 +385,6 @@ function DiasPosibles({ dias, onDiasElegidos }) {
         </>
     );
 }
-
-
-
-
 
 function BotonTerminarPrimerPaso({ onNext }) {
     return <button className={styles.botonConfirmar} onClick={onNext}>Confirmar</button>
