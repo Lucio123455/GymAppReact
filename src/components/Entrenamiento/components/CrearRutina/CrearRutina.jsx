@@ -10,22 +10,7 @@ function CrearRutina() {
         nombre: "",
         dias: []
     });
-
-
-    const navigate = useNavigate();
-
-    const handleBack = () => {
-        // Controla lo que ocurre al "volver atrás"
-        navigate('/crear-rutina');
-    };
-
-    useEffect(() => {
-        window.onpopstate = handleBack;
-
-        return () => {
-            window.onpopstate = null; // Limpia el efecto
-        };
-    }, []);
+    const [dias, setDias] = useState([]);
 
     const siguientePaso = () => setPaso((prev) => prev + 1);
 
@@ -36,12 +21,28 @@ function CrearRutina() {
         }));
     };
 
-    const diasDeLaRutina = (diasElegidos) => {
-        setRutina((prevRutina) => ({
-            ...prevRutina,
-            dias: diasElegidos
-        }))
-    }
+    const diasDeLaRutina = (diasElegidosNombre) => {
+        setDias(diasElegidosNombre);
+    };
+
+    const agregarEjercicioADias = (diaSeleccionado, nuevoEjercicio) => {
+        // Actualizamos el estado de 'dias'
+        setDias((prevDias) => {
+            return prevDias.map((dia) => {
+                if (dia.nombre === diaSeleccionado) {
+                    // Si el nombre del día coincide con el seleccionado, agregamos el nuevo ejercicio
+                    return {
+                        ...dia, // Copiar todas las propiedades del día actual
+                        ejercicios: dia.ejercicios ? [...dia.ejercicios, nuevoEjercicio] : [nuevoEjercicio], // Si ya existen ejercicios, los agregamos, si no, creamos un array con el nuevo ejercicio
+                    };
+                }
+                return dia; // Si no coincide, devolvemos el día tal cual
+            });
+        });
+        console.log(dias);
+    };
+    
+    
 
     const handleClickTerminarPrimerPaso = () => {
         siguientePaso();
@@ -54,7 +55,7 @@ function CrearRutina() {
                 nombre={rutina.nombre}
                 onNombreChange={cambiarNombreRutina}
                 onNext={handleClickTerminarPrimerPaso}
-                dias={rutina.dias}
+                dias={dias}
                 onDiasElegidos={diasDeLaRutina}
             />
         );
@@ -63,52 +64,151 @@ function CrearRutina() {
             <>
                 <SegundoPaso
                     nombre={rutina.nombre}
-                    dias={rutina.dias}
+                    dias={dias}
+                    agregarEjercicioADias={agregarEjercicioADias}
                 />
-
-
-
-
             </>
         )
     }
 }
 
-function SegundoPaso({ nombre, dias }) {
+function SegundoPaso({ nombre, dias, agregarEjercicioADias }) {
     return (
         <>
             <h1 className={styles.tituloDias}>{nombre}</h1>
             <MostrarDias
                 dias={dias}
+                agregarEjercicioADias={agregarEjercicioADias}
             />
         </>
     );
 }
 
-export function DiaConstructor({ dias }) {
+function MostrarDias({ dias , agregarEjercicioADias}) {
+    const navigate = useNavigate();
 
-}
+    const handleBack = () => {
+        setMostrarDiaSeleccionado(null)
+        navigate('/entrenamiento/crear-rutina');
+    };
 
-function MostrarDias({ dias }) {
+    useEffect(() => {
+        window.onpopstate = handleBack;
+
+        return () => {
+            window.onpopstate = null; // Limpia el efecto
+        };
+    }, []);
+
+    const [diaSeleccionado, setMostrarDiaSeleccionado] = useState(null)
+
+    const handleMostrarDia = (dia) => {
+        setMostrarDiaSeleccionado(dia)
+    }
+
+
     return (
         <>
-            <h2>Días seleccionados:</h2>
-            <ul className={styles.listaDias}>
-                {dias.length > 0 ? (
-                    dias.map((dia, index) => (
-                        <li key={index}>
-                            <Link
-                                to={`/crear-rutina/${dia.toLowerCase()}`}
-                                state={dia}
-                            >
-                                {dia}
-                            </Link>
-                        </li>
-                    ))
-                ) : (
-                    <p>No se han seleccionado días.</p>
-                )}
-            </ul>
+            {/* Si mostrarDia tiene un valor, muestra el <h1> con el día */}
+            {diaSeleccionado &&
+                <>
+                    <CargarEjercicios
+                        dia={diaSeleccionado}
+                        dias={dias}
+                        agregarEjercicioADias={agregarEjercicioADias}
+                    />
+                </>
+            }
+
+            {/* Si no hay día seleccionado, muestra la lista */}
+            {!diaSeleccionado && (
+                <>
+                    <h2>Días seleccionados:</h2>
+                    <ul className={styles.listaDias}>
+                        {dias.length > 0 ? (
+                            dias.map((dia, index) => (
+                                <li key={index}>
+                                    <button
+                                        onClick={() => handleMostrarDia(dia.nombre)}
+                                        className={styles.botonDia}
+                                    >
+                                        {dia.nombre}
+                                    </button>
+                                </li>
+                            ))
+                        ) : (
+                            <p>No se han seleccionado días.</p>
+                        )}
+                    </ul>
+                </>
+            )}
+        </>
+    );
+}
+
+function BotonCargarEjercicios({ agregarEjercicio }) {
+    return (
+        <button className={styles.botonDia} onClick={agregarEjercicio}>
+            Cargar Ejercicio
+        </button>
+    );
+}
+
+// Formulario para cargar el ejercicio
+function FormCargarEjercicios({ finalizarEjercicio, dia, agregarEjercicioADias }) {
+    const [ejercicio, setEjercicio] = useState("");
+
+    const handleInputChange = (e) => {
+        setEjercicio(e.target.value);
+    };
+
+    const confirmarEjercicio = () => {
+        if (ejercicio.trim() === "") return; // Evitar agregar un ejercicio vacío
+        agregarEjercicioADias(dia, ejercicio);
+        setEjercicio(""); // Limpiar el campo de texto
+        finalizarEjercicio()
+    };
+
+    return (
+        <>
+            <input
+                type="text"
+                id="nombre-ejercicio"
+                className={styles.inputNombreRutina}
+                placeholder="Nombre del ejercicio"
+                value={ejercicio}
+                onChange={handleInputChange}
+            />
+            <button className={styles.botonDia} onClick={confirmarEjercicio}>
+                Confirmar
+            </button>
+        </>
+    );
+}
+
+// Componente principal para cargar ejercicios
+function CargarEjercicios({ dia, dias ,agregarEjercicioADias }) {
+    const [mostrarForm, setMostrarForm] = useState(false); // Estado para mostrar el formulario
+
+    const agregarEjercicio = () => {
+        setMostrarForm(true);
+    };
+
+    const confirmarEjercicio = () => {
+        setMostrarForm(false)
+        
+    }
+    
+    
+    return (
+        <>  
+            <h1>{dia}</h1>
+            {/* Si mostrarForm es true, mostramos el formulario, de lo contrario mostramos el botón */}
+            {mostrarForm ? (
+                <FormCargarEjercicios finalizarEjercicio={confirmarEjercicio} dia={dia} agregarEjercicioADias={agregarEjercicioADias} /> // Mostrar formulario
+            ) : (
+                <BotonCargarEjercicios agregarEjercicio={agregarEjercicio} /> // Mostrar botón
+            )}
         </>
     );
 }
@@ -152,11 +252,13 @@ function DiasPosibles({ dias, onDiasElegidos }) {
     const todosLosDias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
     const handleCheckboxChange = (dia, isChecked) => {
+        // Si se selecciona el día, agregamos el objeto al array, de lo contrario lo eliminamos
         const nuevosDias = isChecked
-            ? [...dias, dia]
-            : dias.filter((d) => d !== dia);
+            ? [...dias, { nombre: dia, activo: true }] // Agregar el día como objeto con 'activo'
+            : dias.filter((d) => d.nombre !== dia); // Eliminar el día si se deselecciona
 
-        onDiasElegidos(nuevosDias);
+        // Llamar a onDiasElegidos para pasar el array actualizado
+        onDiasElegidos(nuevosDias)
     };
 
     return (
@@ -169,8 +271,8 @@ function DiasPosibles({ dias, onDiasElegidos }) {
                             type="checkbox"
                             name="dias"
                             value={dia}
-                            checked={dias.includes(dia)} // Verificar si el día está seleccionado
-                            onChange={(e) => handleCheckboxChange(dia, e.target.checked)}
+                            checked={dias.some((d) => d.nombre === dia && d.activo)} // Verificar si el día está seleccionado
+                            onChange={(e) => handleCheckboxChange(dia, e.target.checked)} // Llamar a la función de cambio
                         />
                         {dia}
                     </label>
@@ -179,6 +281,9 @@ function DiasPosibles({ dias, onDiasElegidos }) {
         </>
     );
 }
+
+
+
 
 
 function BotonTerminarPrimerPaso({ onNext }) {

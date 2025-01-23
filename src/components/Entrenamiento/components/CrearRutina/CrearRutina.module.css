@@ -1,3 +1,7 @@
+h1 {
+    color: #fff;
+}
+
 .contenedorFormulario {
     display: flex;
     align-items: center;

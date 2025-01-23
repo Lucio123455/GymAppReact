@@ -5,7 +5,7 @@ import { Entrenamiento } from './components/Entrenamiento/Entrenamiento';
 import { Home } from "./components/Home/Home";
 import { Perfil } from "./components/Perfil/Perfil";
 import { Dia } from "./components/Entrenamiento/components/MisRutinas/Dia/Dia";
-import CrearRutina, { DiaConstructor } from "./components/Entrenamiento/components/CrearRutina/CrearRutina";
+import CrearRutina from "./components/Entrenamiento/components/CrearRutina/CrearRutina";
 
 function AppContent() {
   const location = useLocation();
@@ -39,8 +39,7 @@ function AppContent() {
         <Route path="/entrenamiento" element={<Entrenamiento />} />
         <Route path="/perfil" element={<Perfil />} />
         <Route path="/entrenamiento/:nombreRutina/:dia" element={<Dia />} />
-        <Route path="/crear-rutina/*" element={<CrearRutina />} />
-        <Route path="/crear-rutina/:dia" element={<DiaConstructor />} />
+        <Route path="/entrenamiento/crear-rutina" element={<CrearRutina />} />
       </Routes>
       <FooterNav />
     </>

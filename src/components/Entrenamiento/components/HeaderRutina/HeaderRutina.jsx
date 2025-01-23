@@ -9,7 +9,7 @@ export function HeaderRutina() {
             <div className={styles.headerRutina}>
                 <h2 >Rutinas</h2>
                 <div className={styles.botones}>
-                    <Link to="/crear-rutina">
+                    <Link to="/entrenamiento/crear-rutina">
                         <button className={styles.boton}>
                             <img src={carpetaImg} alt="Crear Rutina" />
                             Crear Rutina
