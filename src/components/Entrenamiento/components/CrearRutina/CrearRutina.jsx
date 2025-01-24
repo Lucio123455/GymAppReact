@@ -25,21 +25,52 @@ function CrearRutina() {
         setDias(diasElegidosNombre);
     };
 
-    const agregarEjercicioADias = (diaSeleccionado, nuevoEjercicio) => {
-        // Actualizamos el estado de 'dias'
+    const agregarEjercicioADias = (diaSeleccionado, nombre, series) => {
+        // Update the state of 'dias'
         setDias((prevDias) => {
             return prevDias.map((dia) => {
                 if (dia.nombre === diaSeleccionado) {
-                    // Si el nombre del día coincide con el seleccionado, agregamos el nuevo ejercicio
+                    // If the day's name matches the selected one, add the new exercise
                     return {
-                        ...dia, // Copiar todas las propiedades del día actual
-                        ejercicios: dia.ejercicios ? [...dia.ejercicios, nuevoEjercicio] : [nuevoEjercicio], // Si ya existen ejercicios, los agregamos, si no, creamos un array con el nuevo ejercicio
+                        ...dia, // Copy all properties of the current day
+                        ejercicios: dia.ejercicios
+                            ? [...dia.ejercicios, { nombre, series }] // Add the new exercise as an object
+                            : [{ nombre, series }], // Initialize with the first exercise as an object
                     };
                 }
-                return dia; // Si no coincide, devolvemos el día tal cual
+                return dia; // If it doesn't match, return the day as is
             });
         });
         console.log(dias);
+    };
+
+    useEffect(() => {
+        console.log("Updated dias:", dias);
+    }, [dias]);
+
+
+    const actualizarSerieDelEjercicio = (nuevasSeries, nombreEjercicio, diaEncontrado) => {
+        setDias((prevDias) => {
+            return prevDias.map((dia) => {
+                if (dia.nombre === diaEncontrado) {
+                    console.log(dia.nombre)
+                    return {
+                        ...dia,
+                        ejercicios: dia.ejercicios.map((ejercicio) => {
+                            if (ejercicio.nombre === nombreEjercicio) {
+                                // Update the `series` for the matching exercise
+                                return {
+                                    ...ejercicio,
+                                    series: nuevasSeries,
+                                };
+                            }
+                            return ejercicio; // Return unchanged exercises
+                        }),
+                    };
+                }
+                return dia; // Return unchanged days
+            });
+        });
     };
 
     useEffect(() => {
@@ -76,13 +107,15 @@ function CrearRutina() {
                     dias={dias}
                     agregarEjercicioADias={agregarEjercicioADias}
                     handleConfirmarRutina={handleConfirmarRutina}
+                    actualizarSerieDelEjercicio={actualizarSerieDelEjercicio}
+
                 />
             </>
         )
     }
 }
 
-function SegundoPaso({ dias, agregarEjercicioADias, handleConfirmarRutina }) {
+function SegundoPaso({ dias, agregarEjercicioADias, handleConfirmarRutina, actualizarSerieDelEjercicio }) {
     const navigate = useNavigate();
 
     const handleBack = () => {
@@ -130,6 +163,7 @@ function SegundoPaso({ dias, agregarEjercicioADias, handleConfirmarRutina }) {
                         agregarEjercicioADias={agregarEjercicioADias}
                         handleConfirmarDia={handleConfirmarDia}
                         sacarDeDiasConfirmados={sacarDeDiasConfirmados}
+                        actualizarSerieDelEjercicio={actualizarSerieDelEjercicio}
                     />
                 </>
             ) : (
@@ -206,13 +240,7 @@ function Dia({ dia, index, handleMostrarDia, esDiaConfirmado }) {
 
 
 // Componente principal para cargar ejercicios
-function CargarEjercicios({ dia, dias, agregarEjercicioADias, handleConfirmarDia, sacarDeDiasConfirmados }) {
-    const [mostrarForm, setMostrarForm] = useState(false); // Estado para mostrar el formulario
-
-    const agregarEjercicio = () => {
-        setMostrarForm(true);
-        sacarDeDiasConfirmados(dia)
-    };
+function CargarEjercicios({ dia, dias, agregarEjercicioADias, handleConfirmarDia, sacarDeDiasConfirmados, actualizarSerieDelEjercicio }) {
 
     const confirmarEjercicio = () => {
         setMostrarForm(false)
@@ -221,17 +249,9 @@ function CargarEjercicios({ dia, dias, agregarEjercicioADias, handleConfirmarDia
     return (
         <>
             <h1>{dia}</h1>
-
-            <ListaDeEjercicios diaSeleccionado={dia} dias={dias} />
-            {/* Si mostrarForm es true, mostramos el formulario, de lo contrario mostramos el botón */}
-            {mostrarForm ? (
-                <FormCargarEjercicios finalizarEjercicio={confirmarEjercicio} dia={dia} agregarEjercicioADias={agregarEjercicioADias} /> // Mostrar formulario
-            ) : (
-                <>
-                    <BotonAgregarEjercicios agregarEjercicio={agregarEjercicio} /> // Mostrar botón
-                    <BotonConfirmarDia handleConfirmarDia={handleConfirmarDia} dia={dia} />
-                </>
-            )}
+            <FormCargarEjercicios finalizarEjercicio={confirmarEjercicio} dia={dia} agregarEjercicioADias={agregarEjercicioADias} sacarDeDiasConfirmados={sacarDeDiasConfirmados} />
+            <ListaDeEjercicios diaSeleccionado={dia} dias={dias} actualizarSerieDelEjercicio={actualizarSerieDelEjercicio} />
+            <BotonConfirmarDia handleConfirmarDia={handleConfirmarDia} dia={dia} />
         </>
     );
 }
@@ -249,66 +269,127 @@ function BotonConfirmarDia({ handleConfirmarDia, dia }) {
     );
 }
 
-function BotonAgregarEjercicios({ agregarEjercicio, }) {
-    return (
-        <button className={styles.botonDia} onClick={agregarEjercicio}>
-            Agregar Ejercicio
-        </button>
-    );
-}
-
 // Formulario para cargar el ejercicio
-function FormCargarEjercicios({ finalizarEjercicio, dia, agregarEjercicioADias }) {
+function FormCargarEjercicios({ finalizarEjercicio, dia, agregarEjercicioADias, sacarDeDiasConfirmados }) {
     const [ejercicio, setEjercicio] = useState("");
+    const [series, setSeries] = useState(null);
 
-    const handleInputChange = (e) => {
+    const handleInputChangeNombre = (e) => {
         setEjercicio(e.target.value);
     };
 
+    const handleInputChangeSeries = (e) => {
+        setSeries(e.target.value);
+    }
+
     const confirmarEjercicio = () => {
         if (ejercicio.trim() === "") return; // Evitar agregar un ejercicio vacío
-        agregarEjercicioADias(dia, ejercicio);
+        agregarEjercicioADias(dia, ejercicio, series);
         setEjercicio(""); // Limpiar el campo de texto
+        setSeries("")
         finalizarEjercicio()
+        sacarDeDiasConfirmados(dia)
     };
 
     return (
         <>
-            <input
-                type="text"
-                id="nombre-ejercicio"
-                className={styles.inputNombreRutina}
-                placeholder="Nombre del ejercicio"
-                value={ejercicio}
-                onChange={handleInputChange}
-            />
-            <button className={styles.botonDia} onClick={confirmarEjercicio}>
-                Confirmar
-            </button>
+            <div className={styles.formCargarRutina}>
+                <input
+                    type="text"
+                    id="nombre-ejercicio"
+                    className={styles.formInput}
+                    placeholder="Nombre del ejercicio"
+                    value={ejercicio}
+                    onChange={handleInputChangeNombre}
+                />
+                {/*<input
+                    type="number"
+                    id="series-ejercicio"
+                    className={styles.inputSeries}
+                    placeholder=""
+                    value={series}
+                    onChange={handleInputChangeSeries}
+                />*/}
+                <button className={styles.formBoton} onClick={confirmarEjercicio}>
+                    <i class="fas fa-plus-circle fa-lg"></i>
+                </button>
+            </div>
+
         </>
     );
 }
 
-function ListaDeEjercicios({ dias, diaSeleccionado }) {
+function ListaDeEjercicios({ dias, diaSeleccionado, actualizarSerieDelEjercicio }) {
     const diaEncontrado = dias.find((dia) => dia.nombre === diaSeleccionado);
 
     return (
         <>
-            {diaEncontrado && Array.isArray(diaEncontrado.ejercicios) ? (
-                <ul className={styles.listaDias}>
-                    {diaEncontrado.ejercicios.map((ejercicio, index) => (
-                        <Ejercicio ejercicio={ejercicio} index={index} />
-                    ))}
-                </ul>
-            ) : (
-                <p>Aun no has cargado ejercicios en: {diaSeleccionado}, carga el primero dando click en agregar ejercicio</p>
-            )}
+            <div className={styles.contenedorEjercicios}>
+                {diaEncontrado && Array.isArray(diaEncontrado.ejercicios) ? (
+                    <ul className={styles.listaEjercicios}>
+                        {diaEncontrado.ejercicios.map((ejercicio, index) => (
+                            <Ejercicio ejercicio={ejercicio} index={index} dia={diaEncontrado} actualizarSerieDelEjercicio={actualizarSerieDelEjercicio} />
+                        ))}
+                    </ul>
+                ) : (
+                    <p>Aun no has cargado ejercicios en: {diaSeleccionado}, carga el primero dando click en agregar ejercicio</p>
+                )}
+            </div>
         </>
     );
 }
 
-function Ejercicio({ ejercicio, index }) {
-    return <li key={`${ejercicio}-${index}`} className={styles.botonDia}>{ejercicio}</li>
+function Ejercicio({ ejercicio, index, dia, actualizarSerieDelEjercicio }) {
+    const [series, setSeries] = useState(ejercicio.series);
+
+    const handleInputChangeSeries = (e) => {
+        setSeries(e.target.value);
+    }
+
+    const handleIncrementar = () => {
+        setSeries((prevSeries) => Math.min(prevSeries + 1, 100)); // Limita a 100 como máximo
+    }
+
+    const handleDecrementar = () => {
+        setSeries((prevSeries) => Math.max(prevSeries - 1, 0)); // Limita a 0 como mínimo
+    }
+
+    const handleConfirmarSeries = () => {
+        actualizarSerieDelEjercicio(series, ejercicio.nombre, dia.nombre);
+        console.log(series);
+        console.log(dia);
+        console.log(ejercicio.nombre);
+        console.log("serie modificada");
+    }
+
+    return (
+        <>
+            <div className={styles.ejercicio}>
+                <li key={`${ejercicio.nombre}-${index}`} className={styles.ejercicioNombre}>{ejercicio.nombre}</li>
+                
+                <div className={styles.inputContainer}>
+                    
+                        <input
+                            type="number"
+                            id="series-ejercicio"
+                            placeholder={ejercicio.series}
+                            value={series}
+                            onChange={handleInputChangeSeries}
+                            step="1"
+                            min="0"
+                            max="100"
+                        />
+                        <div>
+                            <button type="button" onClick={handleIncrementar} className={styles.flecha}>+</button>
+                            <button type="button" onClick={handleDecrementar} className={styles.flecha}>-</button>
+                        </div>
+                        
+                </div>
+                <button className={styles.completeBtn} onClick={handleConfirmarSeries}><i className='fas fa-check-circle'></i></button>
+                <button className={styles.trashBtn}><i className='fas fa-trash'></i></button>
+            </div>
+        </>
+    );
 }
 
 
@@ -351,20 +432,20 @@ function DiasPosibles({ dias, onDiasElegidos }) {
 
     const handleCheckboxChange = (dia, isChecked) => {
         let nuevosDias;
-    
+
         if (isChecked) {
             nuevosDias = [...dias, { nombre: dia, activo: true }];
         } else {
             nuevosDias = dias.filter((d) => d.nombre !== dia);
         }
-    
+
         nuevosDias.sort((a, b) => {
             return todosLosDias.indexOf(a.nombre) - todosLosDias.indexOf(b.nombre);
         });
 
         onDiasElegidos(nuevosDias);
     };
-    
+
     return (
         <>
             <label htmlFor="dias-semanales">Días semanales</label>
