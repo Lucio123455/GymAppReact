@@ -235,6 +235,8 @@
     outline: none;
     color: #fff;
     padding-left: 1em;
+    display: flex;
+    align-items: center;
    
 }
 
@@ -262,6 +264,8 @@ input[type="text"]:focus~label,
     top: 0.75em;
     cursor: text;
     transition: top 350ms ease-in, font-size 350ms ease-in;
+    display: flex;
+    align-items: center;
   }
 
   .primerPaso {
@@ -271,5 +275,13 @@ input[type="text"]:focus~label,
         align-items: center;
         flex-direction: column;
 }
+
+.listaDias {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
 
 

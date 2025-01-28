@@ -263,7 +263,6 @@ function ListaDias({ dias, handleMostrarDia, diasConfirmados }) {
 
     return (
         <>
-            <h2>Días seleccionados:</h2>
             <ul className={styles.listaDias}>
                 {dias.length > 0 ? (
                     dias.map((dia, index) => (
