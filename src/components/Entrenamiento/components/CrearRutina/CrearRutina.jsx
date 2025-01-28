@@ -60,6 +60,31 @@ function CrearRutina() {
         });
     };
 
+    const eliminarSerie = (ejercicio, diaNombre) => {
+        setDias((prevDias) => {
+            return prevDias.map((dia) => {
+                if (dia.nombre === diaNombre) {
+                    return {
+                        ...dia,
+                        ejercicios: dia.ejercicios.map((ej) => {
+                            if (ej.nombre === ejercicio.nombre) {
+                                // Eliminar 'series' usando desestructuración
+                                const { series, ...restoEjercicio } = ej;
+                                console.log('hola')
+                                return restoEjercicio;
+
+                            }
+                            return ej;
+                        }),
+                    };
+                }
+                return dia; // Retorna el día sin cambios si no coincide
+            });
+        });
+    };
+    
+    
+
 
     useEffect(() => {
         console.log("Updated dias:", dias);
@@ -126,6 +151,7 @@ function CrearRutina() {
                     handleConfirmarRutina={handleConfirmarRutina}
                     actualizarSerieDelEjercicio={actualizarSerieDelEjercicio}
                     eliminarEjercicio={eliminarEjercicio}
+                    eliminarSerie={eliminarSerie}
 
                 />
             </>
@@ -133,7 +159,7 @@ function CrearRutina() {
     }
 }
 
-function SegundoPaso({ dias, agregarEjercicioADias, handleConfirmarRutina, actualizarSerieDelEjercicio, eliminarEjercicio }) {
+function SegundoPaso({ dias, agregarEjercicioADias, handleConfirmarRutina, actualizarSerieDelEjercicio, eliminarEjercicio , eliminarSerie}) {
     const navigate = useNavigate();
 
     const handleBack = () => {
@@ -196,6 +222,7 @@ function SegundoPaso({ dias, agregarEjercicioADias, handleConfirmarRutina, actua
                         sacarDeDiasConfirmados={sacarDeDiasConfirmados}
                         actualizarSerieDelEjercicio={actualizarSerieDelEjercicio}
                         eliminarEjercicio={eliminarEjercicio}
+                        eliminarSerie={eliminarSerie}
                     />
                 </>
             ) : (
@@ -272,7 +299,7 @@ function Dia({ dia, index, handleMostrarDia, esDiaConfirmado }) {
 
 
 // Componente principal para cargar ejercicios
-function CargarEjercicios({ dia, dias, agregarEjercicioADias, handleConfirmarDia, sacarDeDiasConfirmados, actualizarSerieDelEjercicio, eliminarEjercicio }) {
+function CargarEjercicios({ dia, dias, agregarEjercicioADias, handleConfirmarDia, sacarDeDiasConfirmados, actualizarSerieDelEjercicio, eliminarEjercicio , eliminarSerie}) {
 
     const confirmarEjercicio = () => {
         console.log("ejercicio confirmado")
@@ -282,7 +309,7 @@ function CargarEjercicios({ dia, dias, agregarEjercicioADias, handleConfirmarDia
         <>
             <h1 className={styles.title}>{dia}</h1>
             <FormCargarEjercicios finalizarEjercicio={confirmarEjercicio} dia={dia} agregarEjercicioADias={agregarEjercicioADias} sacarDeDiasConfirmados={sacarDeDiasConfirmados} />
-            <ListaDeEjercicios diaSeleccionado={dia} dias={dias} actualizarSerieDelEjercicio={actualizarSerieDelEjercicio} eliminarEjercicio={eliminarEjercicio} />
+            <ListaDeEjercicios diaSeleccionado={dia} dias={dias} actualizarSerieDelEjercicio={actualizarSerieDelEjercicio} eliminarEjercicio={eliminarEjercicio}  eliminarSerie={eliminarSerie}/>
             <BotonConfirmarDia handleConfirmarDia={handleConfirmarDia} dia={dia} />
         </>
     );
@@ -329,7 +356,7 @@ function FormCargarEjercicios({ finalizarEjercicio, dia, agregarEjercicioADias, 
                 <input
                     type="text"
                     id="nombre-ejercicio"
-                    className={styles.formInput}
+                    className={styles.formInputEjercicio}
                     placeholder="Nombre del ejercicio"
                     value={ejercicio}
                     onChange={handleInputChangeNombre}
@@ -351,7 +378,7 @@ function FormCargarEjercicios({ finalizarEjercicio, dia, agregarEjercicioADias, 
     );
 }
 
-function ListaDeEjercicios({ dias, diaSeleccionado, actualizarSerieDelEjercicio, eliminarEjercicio }) {
+function ListaDeEjercicios({ dias, diaSeleccionado, actualizarSerieDelEjercicio, eliminarEjercicio , eliminarSerie}) {
     const diaEncontrado = dias.find((dia) => dia.nombre === diaSeleccionado);
 
     const handleDelete = (nombreEjercicio, nombreDia, setClaseAdicional) => {
@@ -378,6 +405,7 @@ function ListaDeEjercicios({ dias, diaSeleccionado, actualizarSerieDelEjercicio,
                                 dia={diaEncontrado}
                                 handleDelete={handleDelete} // Pasa la función handleDelete como prop
                                 handleConfirmar={handleConfirmar} // Pasa la función handleConfirmar como prop
+                                eliminarSerie={eliminarSerie}
                             />
                         ))}
                     </ul>
@@ -389,7 +417,7 @@ function ListaDeEjercicios({ dias, diaSeleccionado, actualizarSerieDelEjercicio,
     );
 }
 
-function Ejercicio({ ejercicio, index, dia, handleDelete, handleConfirmar }) {
+function Ejercicio({ ejercicio, index, dia, handleDelete, handleConfirmar , eliminarSerie}) {
     const [series, setSeries] = useState(ejercicio.series || 0);
     const [confirmado, setConfirmado] = useState(!!ejercicio.series);
     const [claseAdicional, setClaseAdicional] = useState("");
@@ -401,13 +429,13 @@ function Ejercicio({ ejercicio, index, dia, handleDelete, handleConfirmar }) {
     const handleIncrementar = () => {
         setSeries((prevSeries) => Math.min(prevSeries + 1, 100));
         setConfirmado(false);
-
+        eliminarSerie(ejercicio,dia.nombre)
     };
 
     const handleDecrementar = () => {
         setSeries((prevSeries) => Math.max(prevSeries - 1, 0));
         setConfirmado(false);
-
+        eliminarSerie(ejercicio,dia.nombre)
     };
 
     const handleConfirmarClick = () => {
