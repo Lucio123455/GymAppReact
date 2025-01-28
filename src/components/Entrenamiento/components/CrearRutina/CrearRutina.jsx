@@ -164,11 +164,24 @@ function SegundoPaso({ dias, agregarEjercicioADias, handleConfirmarRutina, actua
     };
 
     const handleConfirmarDia = (dia) => {
+        const diaEncontrado = dias.find((d) => d.nombre === dia);
+
+        if (diaEncontrado) {
+            const ejerciciosSinSeries = diaEncontrado.ejercicios.some((ejercicio) => !ejercicio.series);
+
+            if (ejerciciosSinSeries) {
+                alert("Faltan confirmar ejercicios");
+                return; // Salimos de la función si hay ejercicios sin confirmar
+            }
+        }
+
         if (!diasConfirmados.includes(dia)) {
             setDiasConfirmados([...diasConfirmados, dia]);
         }
-        setDiaSeleccionado(null)
-    }
+
+        setDiaSeleccionado(null);
+    };
+
 
     return (
         <>
@@ -279,7 +292,7 @@ function BotonConfirmarDia({ handleConfirmarDia, dia }) {
     return (
         <>
             <button
-                className={styles.botonConfirmarDia}
+                className={styles.botonConfirmar}
                 onClick={() => handleConfirmarDia(dia)}
             >
                 Confirmar Dia
@@ -348,6 +361,10 @@ function ListaDeEjercicios({ dias, diaSeleccionado, actualizarSerieDelEjercicio,
         }, 300); // Ajusta el tiempo según la duración de la animación
     };
 
+    const handleConfirmar = (series, nombreEjercicio, nombreDia) => {
+        actualizarSerieDelEjercicio(series, nombreEjercicio, nombreDia);
+    };
+
     return (
         <>
             <div className={styles.contenedorEjercicios}>
@@ -359,8 +376,8 @@ function ListaDeEjercicios({ dias, diaSeleccionado, actualizarSerieDelEjercicio,
                                 ejercicio={ejercicio}
                                 index={index}
                                 dia={diaEncontrado}
-                                actualizarSerieDelEjercicio={actualizarSerieDelEjercicio}
                                 handleDelete={handleDelete} // Pasa la función handleDelete como prop
+                                handleConfirmar={handleConfirmar} // Pasa la función handleConfirmar como prop
                             />
                         ))}
                     </ul>
@@ -372,9 +389,9 @@ function ListaDeEjercicios({ dias, diaSeleccionado, actualizarSerieDelEjercicio,
     );
 }
 
-function Ejercicio({ ejercicio, index, dia, actualizarSerieDelEjercicio, handleDelete }) {
-    const [series, setSeries] = useState("");
-    const [confirmado, setConfirmado] = useState(false);
+function Ejercicio({ ejercicio, index, dia, handleDelete, handleConfirmar }) {
+    const [series, setSeries] = useState(ejercicio.series || 0);
+    const [confirmado, setConfirmado] = useState(!!ejercicio.series);
     const [claseAdicional, setClaseAdicional] = useState("");
 
     const handleInputChangeSeries = (e) => {
@@ -383,14 +400,18 @@ function Ejercicio({ ejercicio, index, dia, actualizarSerieDelEjercicio, handleD
 
     const handleIncrementar = () => {
         setSeries((prevSeries) => Math.min(prevSeries + 1, 100));
+        setConfirmado(false);
+
     };
 
     const handleDecrementar = () => {
         setSeries((prevSeries) => Math.max(prevSeries - 1, 0));
+        setConfirmado(false);
+
     };
 
-    const handleConfirmarSeries = () => {
-        actualizarSerieDelEjercicio(series, ejercicio.nombre, dia.nombre);
+    const handleConfirmarClick = () => {
+        handleConfirmar(series, ejercicio.nombre, dia.nombre); // Llama a la función handleConfirmar desde el componente padre
         setConfirmado(true);
     };
 
@@ -421,7 +442,7 @@ function Ejercicio({ ejercicio, index, dia, actualizarSerieDelEjercicio, handleD
                 </div>
             </div>
 
-            <button className={styles.completeBtn} onClick={handleConfirmarSeries}>
+            <button className={styles.completeBtn} onClick={handleConfirmarClick}>
                 <i className='fas fa-check-circle'></i>
             </button>
 
@@ -437,37 +458,41 @@ function Ejercicio({ ejercicio, index, dia, actualizarSerieDelEjercicio, handleD
 
 
 
+
 function PrimerPaso({ nombre, onNombreChange, onNext, dias, onDiasElegidos }) {
     return (
         <>
-            <NombreRutina
-                nombre={nombre}
-                onNombreChange={onNombreChange}
-            />
-            <DiasPosibles
-                dias={dias}
-                onDiasElegidos={onDiasElegidos}
-            />
-            <BotonTerminarPrimerPaso
-                onNext={onNext}
-            />
+            <div className={styles.primerPaso}>
+                <NombreRutina
+                    nombre={nombre}
+                    onNombreChange={onNombreChange}
+                />
+                <DiasPosibles
+                    dias={dias}
+                    onDiasElegidos={onDiasElegidos}
+                />
+                <BotonTerminarPrimerPaso
+                    onNext={onNext}
+                />
+            </div>
         </>
     );
 }
 
 function NombreRutina({ nombre, onNombreChange }) {
     return (
-        <>
-            <label htmlFor="nombre-rutina" className={styles.nombreRutina}>Nombre de la rutina</label>
+        <div className={styles.rutinaNombreConteiner}>
             <input
-                type="text" id="nombre-rutina"
-                className={styles.inputNombreRutina}
-                placeholder="Nombre de la rutina"
-                required
+                type="text"
+                id="nombre-rutina"
+                autoComplete="off"
+                placeholder=" "
+                className={styles.formInput}
                 value={nombre}
                 onChange={(e) => onNombreChange(e.target.value)}
             />
-        </>
+            <label className={styles.labelNombreRutina} for="nombre-rutina">Nombre de la rutina</label>
+        </div>
     );
 }
 
@@ -492,21 +517,25 @@ function DiasPosibles({ dias, onDiasElegidos }) {
 
     return (
         <>
-            <label htmlFor="dias-semanales">Días semanales</label>
+            <div className={styles.container}>
+            <label htmlFor="dias-semanales" className={styles.forLabelDias}>Días semanales</label>
             <div id="dias-semanales" className={styles.diasSemanales}>
                 {todosLosDias.map((dia) => (
-                    <label key={dia} className={styles.dia}>
+                    <div key={dia} className={styles.container}>
                         <input
                             type="checkbox"
+                            id={dia}
                             name="dias"
                             value={dia}
-                            checked={dias.some((d) => d.nombre === dia && d.activo)} // Verificar si el día está seleccionado
-                            onChange={(e) => handleCheckboxChange(dia, e.target.checked)} // Llamar a la función de cambio
+                            checked={dias.some((d) => d.nombre === dia && d.activo)}
+                            onChange={(e) => handleCheckboxChange(dia, e.target.checked)}
+                            className={styles.forInputDias}
                         />
-                        {dia}
-                    </label>
+                        <label htmlFor={dia} className={styles.forLabelDias}>{dia}</label>
+                    </div>
                 ))}
             </div>
+        </div>
         </>
     );
 }

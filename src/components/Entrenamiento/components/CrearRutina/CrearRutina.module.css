@@ -140,7 +140,7 @@
     align-items: center;
     transition: 0.5s;
     border-radius: 2rem;
-    
+
 }
 
 .ejercicio li {
@@ -168,36 +168,151 @@
 /* Pseudo-elemento para animar el borde */
 
 
-.botonConfirmarDia {
+.botonConfirmar {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 10px 20px; /* Ajusta el tamaño del botón */
-    margin: 0 auto; /* Centra el botón horizontalmente */
+    padding: 10px 20px;
+    /* Ajusta el tamaño del botón */
+    margin: 0 auto;
+    /* Centra el botón horizontalmente */
     margin-bottom: 80px;
     margin-top: 20px;
-    background-color: #007bff; /* Color de fondo moderno */
-    color: white; /* Color del texto */
-    font-size: 1.2rem; /* Tamaño de la fuente */
-    font-weight: bold; /* Texto en negrita */
-    border: none; /* Elimina el borde por defecto */
-    border-radius: 30px; /* Bordes redondeados */
-    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3); /* Sombra sutil */
-    cursor: pointer; /* Cambia el cursor a mano cuando pasa por encima */
-    transition: all 0.3s ease; /* Transición suave para los efectos */
+    background-color: #007bff;
+    /* Color de fondo moderno */
+    color: white;
+    /* Color del texto */
+    font-size: 1.2rem;
+    /* Tamaño de la fuente */
+    font-weight: bold;
+    /* Texto en negrita */
+    border: none;
+    /* Elimina el borde por defecto */
+    border-radius: 30px;
+    /* Bordes redondeados */
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+    /* Sombra sutil */
+    cursor: pointer;
+    /* Cambia el cursor a mano cuando pasa por encima */
+    transition: all 0.3s ease;
+    /* Transición suave para los efectos */
 }
 
 .botonConfirmarDia:hover {
-    background-color: #0056b3; /* Color de fondo cuando se pasa el mouse */
-    box-shadow: 0 6px 12px rgba(0, 123, 255, 0.4); /* Aumenta la sombra en hover */
+    background-color: #0056b3;
+    /* Color de fondo cuando se pasa el mouse */
+    box-shadow: 0 6px 12px rgba(0, 123, 255, 0.4);
+    /* Aumenta la sombra en hover */
 }
 
 .botonConfirmarDia:active {
-    transform: scale(0.98); /* Efecto de "presionar" cuando se hace clic */
+    transform: scale(0.98);
+    /* Efecto de "presionar" cuando se hace clic */
 }
 
 
 .title {
     text-align: center;
     margin-bottom: 0;
+}
+
+.rutinaNombreConteiner {
+    width: 80%;
+    max-width: 20em;
+    height: 2.5em;
+    position: relative;
+    margin: 0 auto; /* Centra horizontalmente */
+    margin-top: 30px; /* Espaciado superior */
+}
+
+.formInput {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background: #121212;
+    border: 2px solid #fff;
+    border-radius: 0.5em;
+    outline: none;
+    color: #fff;
+    padding-left: 1em;
+   
+}
+
+.formInput:hover {
+    border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+.formInput:focus {
+    border: 2px solid #00ffff;
+}
+
+input[type="text"]:focus~label,
+.formInput:not(:placeholder-shown).form__input:not(:focus)~label {
+    top: -0.5em;
+    font-size: 0.75rem;
+    padding: 0 0.125em;
+}
+
+.labelNombreRutina {
+    position: absolute;
+    background: #121212;
+    color: #fff;
+    font-family: sans-serif;
+    left: 1em;
+    top: 0.75em;
+    cursor: text;
+    transition: top 350ms ease-in, font-size 350ms ease-in;
+  }
+
+  .primerPaso {
+    background: #121212;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+}
+
+.container {
+    width: 90%;
+    max-width: 20em;
+    height: 2.5em;
+    position: relative;
+}
+
+.forInputDias {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background: #121212;
+    border: 2px solid #fff;
+    border-radius: 0.5em;
+    outline: none;
+    color: #fff;
+    padding-left: 1em;
+}
+
+.forLabelDias {
+    position: absolute;
+    background: #121212;
+    color: #fff;
+    font-family: sans-serif;
+    left: 1em;
+    top: 0.75em;
+    cursor: text;
+    transition: top 350ms ease-in, font-size 350ms ease-in;
+}
+
+.forInputDias:hover {
+    border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+.forInputDias:focus {
+    border: 2px solid #00ffff;
+}
+
+input[type="checkbox"]:focus ~ .forLabelDias,
+.forInputDias:not(:placeholder-shown):not(:focus) ~ .forLabelDias {
+    top: -0.5em;
+    font-size: 0.75rem;
+    padding: 0 0.125em;
 }
