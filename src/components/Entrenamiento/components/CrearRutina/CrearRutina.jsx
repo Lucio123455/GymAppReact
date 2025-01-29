@@ -227,6 +227,7 @@ function SegundoPaso({ dias, agregarEjercicioADias, handleConfirmarRutina, actua
                 </>
             ) : (
                 <>
+                    <div className={styles.contenedorPrincipalDias}>
                     <ListaDias
                         dias={dias}
                         handleMostrarDia={handleMostrarDia}
@@ -234,6 +235,8 @@ function SegundoPaso({ dias, agregarEjercicioADias, handleConfirmarRutina, actua
                     {diasConfirmados.length === dias.length && (
                         <BotonConfirmarRutina handleConfirmarRutina={handleConfirmarRutina} />
                     )}
+                    </div>
+                    
                 </>
             )}
         </>

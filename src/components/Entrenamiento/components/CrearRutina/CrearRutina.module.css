@@ -189,6 +189,9 @@
 
 /* Pseudo-elemento para animar el borde */
 
+.contenedorPrincipalDias {
+    padding-bottom: 80px;
+}
 
 .botonConfirmar {
     display: flex;
@@ -345,3 +348,6 @@ input[type="text"]:focus~label,
 
 
 
+.diasSemanales {
+    margin-top: 50px;
+}
