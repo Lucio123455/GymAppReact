@@ -245,7 +245,7 @@ function BotonConfirmarRutina({ handleConfirmarRutina }) {
         <>
             <Link to={"/entrenamiento"}>
                 <button
-                    className={styles.botonDia}
+                    className={styles.botonConfirmar}
                     onClick={() => handleConfirmarRutina()}
                 >
                     Confirmar Rutina
@@ -257,45 +257,38 @@ function BotonConfirmarRutina({ handleConfirmarRutina }) {
 }
 
 function ListaDias({ dias, handleMostrarDia, diasConfirmados }) {
-    const esDiaConfirmado = (dia, diasConfirmados) => {
-        return diasConfirmados.includes(dia);
-    };
+    const esDiaConfirmado = (dia, diasConfirmados) => diasConfirmados.includes(dia);
 
     return (
-        <>
-            <ul className={styles.listaDias}>
-                {dias.length > 0 ? (
-                    dias.map((dia, index) => (
-                        <Dia
-                            key={`${dia.nombre}-${index}`}
-                            dia={dia}
-                            index={index}
-                            handleMostrarDia={handleMostrarDia}
-                            esDiaConfirmado={esDiaConfirmado(dia.nombre, diasConfirmados)}
-                        />
-                    ))
-                ) : (
-                    <p>No se han seleccionado días.</p>
-                )}
-            </ul>
-        </>
+        <ul className={styles.listaDias}>
+            {dias.length > 0 ? (
+                dias.map((dia, index) => (
+                    <Dia
+                        key={`${dia.nombre}-${index}`}
+                        dia={dia}
+                        handleMostrarDia={handleMostrarDia}
+                        esDiaConfirmado={esDiaConfirmado(dia.nombre, diasConfirmados)}
+                    />
+                ))
+            ) : (
+                <p>No se han seleccionado días.</p>
+            )}
+        </ul>
     );
 }
 
-function Dia({ dia, index, handleMostrarDia, esDiaConfirmado }) {
+function Dia({ dia, handleMostrarDia, esDiaConfirmado }) {
     return (
-        <li key={`${dia.nombre}-${index}`}>
+        <li className={styles.itemDia}>
             <button
                 onClick={() => handleMostrarDia(dia.nombre)}
-                className={styles.botonDia}
-                style={{ backgroundColor: esDiaConfirmado ? 'green' : 'blue' }}
+                className={`${styles.botonDia} ${esDiaConfirmado ? styles.diaConfirmado : ""}`}
             >
                 {dia.nombre}
             </button>
         </li>
     );
 }
-
 
 // Componente principal para cargar ejercicios
 function CargarEjercicios({ dia, dias, agregarEjercicioADias, handleConfirmarDia, sacarDeDiasConfirmados, actualizarSerieDelEjercicio, eliminarEjercicio , eliminarSerie}) {
