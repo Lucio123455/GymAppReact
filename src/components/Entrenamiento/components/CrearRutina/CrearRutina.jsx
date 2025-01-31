@@ -3,6 +3,7 @@ import styles from './CrearRutina.module.css';
 import { Link, Route, Routes, Outlet, useParams, useLocation, useNavigate } from 'react-router-dom';
 import tick from '../../../../assets/marca-de-verificacion.png'
 import cruz from '../../../../assets/cerrar.png'
+import ConfettiExplosion from './Confeti/ConfettiExplosion';
 
 function CrearRutina() {
     const [paso, setPaso] = useState(0);
@@ -59,7 +60,7 @@ function CrearRutina() {
             });
         });
     };
-
+    
     const eliminarSerie = (ejercicio, diaNombre) => {
         setDias((prevDias) => {
             return prevDias.map((dia) => {
