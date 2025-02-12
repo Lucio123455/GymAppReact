@@ -6,17 +6,20 @@ function Informacion() {
             <div className="contenedor-informacion">
                 <Link to="/perfil/medidas">
                     <button className="boton-informacion">
-                        <img  />
-                            Medidas
+                        <img />
+                        Medidas
                     </button>
                 </Link>
 
-                <Link to={"/perfil/progreso"}>
-
+                <Link to={"/perfil/ejercicios"}>
+                    <button className="boton-informacion">
+                        <img />
+                            Ejercicios
+                    </button>
                 </Link>
             </div>
         </>
     )
-} 
+}
 
 export default Informacion

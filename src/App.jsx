@@ -7,6 +7,7 @@ import { Perfil } from "./components/Perfil/Perfil";
 import { Dia } from "./components/Entrenamiento/components/MisRutinas/Dia/Dia";
 import CrearRutina from "./components/Entrenamiento/components/CrearRutina/CrearRutina";
 import Medidas from "./components/Perfil/Informacion/Medidas/Medidas";
+import Ejercicios from "./components/Perfil/Informacion/Ejercicios/Ejercicios";
 
 function AppContent() {
   const location = useLocation();
@@ -38,8 +39,11 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/entrenamiento" element={<Entrenamiento />} />
+        
         <Route path="/perfil" element={<Perfil />} />
         <Route path="/perfil/medidas" element={<Medidas/>} />
+        <Route path="/perfil/ejercicios" element={<Ejercicios/>} />
+        
         <Route path="/entrenamiento/:nombreRutina/:dia" element={<Dia />} />
         <Route path="/entrenamiento/crear-rutina" element={<CrearRutina />} />
       </Routes>

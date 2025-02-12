@@ -1,11 +1,12 @@
 html, body {
   margin: 0;
   padding: 0;
-  background-color: rgb(255, 255, 255);
-  color: rgb(255, 255, 255);
+  background-color: rgb(116, 104, 104);
+  color: rgb(0, 0, 0);
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
   
 }
+
 
 :root {
   --primary-color: #2b2b2b;
